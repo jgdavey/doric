@@ -22,16 +22,13 @@
 
 (def columnize (comp column-defaults column-map))
 
-(defn width [col & [data]]
+(defn width [col data]
   (or (:width col)
       (apply max (map count (cons (:title col)
                                   (map str data))))))
 
 (defn bar [x]
   (apply str (repeat x "#")))
-
-(defn format-cell [col s]
-  ((:format col) s))
 
 (defn header [th cols]
   (for [col cols
@@ -44,23 +41,22 @@
           :when (:when col)]
       (td col row))))
 
+(defn format-rows [cols rows]
+  (for [row rows]
+    (reduce
+     (fn [m {:keys [name] :as col}]
+       (assoc m name
+              ((:format col) (get row name))))
+     {}
+     cols)))
+
 (defn- col-data [col rows]
   (map #(get % (:name col)) rows))
 
-
-(defn- format-rows [cols rows]
-  (for [row rows]
-    (into {}
-          (for [col cols :let [name (:name col)]]
-            [name (format-cell col (row name))]))))
-
-(defn- column2 [col & [data]]
-  {:width (width col data)})
-
-(defn- columns2 [cols rows]
+(defn columns-with-widths [cols rows]
   (for [col cols]
     (merge col
-           (column2 col (col-data col rows)))))
+           {:width (width col (col-data col rows))})))
 
 ;; table formats
 (def csv 'doric.csv)
@@ -77,28 +73,38 @@
                                     (map-indexed (fn [i x] [i x]) row)))
           (map? example) rows)))
 
+(defn conform
+  "Given an optional colspec and a sequence of maps, returns tuple
+  of [conformed-columns formatted-rows]"
+  ([rows]
+   (conform nil rows))
+  ([cols rows]
+   (let [rows (mapify rows)
+         cols (map columnize (or cols
+                                 (keys (first rows))))
+         rows (format-rows cols rows)
+         cols (columns-with-widths cols rows)]
+     [cols rows])))
+
 (defn table*
   {:arglists '[[rows]
                [opts rows]
                [cols rows]
                [opts cols rows]]}
   [& args]
-  (let [rows (mapify (last args))
+  (let [rows (last args)
         [opts cols] (case (count args)
                       1 [nil nil]
                       2 (if (map? (first args))
                           [(first args) nil]
                           [nil (first args)])
                       3 [(first args) (second args)])
-        cols (or cols (keys (first rows)))
         format (or (:format opts) org)
         _ (require format)
         th (ns-resolve format 'th)
         td (ns-resolve format 'td)
         render (ns-resolve format 'render)
-        cols (map columnize cols)
-        rows (format-rows cols rows)
-        cols (columns2 cols rows)]
+        [cols rows] (conform cols rows)]
     (render (cons (header th cols) (body td cols rows)))))
 
 (defn table

@@ -19,12 +19,10 @@
   (is (not (re-find #"bar" (table [{:name :foo :when false}] [{:foo :bar}])))))
 
 (deftest test-width
-  (is (= 5 (width {:width 5})))
-  (is (= 5 (width {:width 5 :name :foobar})))
+  (is (= 5 (width {:width 5} ["no matter what"])))
+  (is (= 9 (width {:title "TitleCase"} ["hi"])))
+  (is (= 8 (width {:title "Title"} ["whatever" "is" "largest"])))
   (is (= 7 (width {:name :foobar} ["foobar2"]))))
-
-(deftest test-format-cell
-  (is (= 2 (format-cell {:format inc} 1))))
 
 (deftest test-th
   (is (= "Title  " (th {:title "Title" :width 7 :title-align :left})))

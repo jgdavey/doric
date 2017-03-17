@@ -1,5 +1,6 @@
 (ns doric.protocols
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [doric.formatting :refer [escape]]))
 
 (defprotocol Render
   (-render-lazy [_ cols data])
@@ -14,11 +15,11 @@
     (assemble
      (cons (for [col cols
                  :when (:when col)]
-             (th col (:title col)))
+             (th col (escape (:title col))))
            (for [row data]
              (for [col cols
                    :when (:when col)]
-               (td col (get row (:name col)))))))))
+               (td col (escape (get row (:name col))))))))))
 
 (defn render-lazy [renderer cols data]
   (-render-lazy renderer cols data))

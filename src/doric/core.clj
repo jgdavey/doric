@@ -1,6 +1,5 @@
 (ns doric.core
-  (:refer-clojure :exclude [format name join split])
-  (:require [doric.formatting :refer [titleize]]
+  (:require [doric.formatting :refer [titleize escape]]
             [doric.protocols :refer [render render-lazy]]
             [clojure.string :as str]
             [doric.org]
@@ -14,6 +13,8 @@
          {:align (keyword (get col :align :left))
           :format (or (:format col)
                       identity)
+          :escape (or (:escape col)
+                      escape)
           :title  (or (:title col)
                       (titleize (:name col)))
           :title-align (keyword (or (:title-align col)
@@ -28,10 +29,10 @@
 
 (def columnize (comp column-defaults column-map))
 
-(defn width [col data]
-  (or (:width col)
-      (apply max (map count (cons (:title col)
-                                  (map str data))))))
+(defn width [{:keys [title escape width]} data]
+  (or width
+      (apply max (map count (cons title
+                                  (map (comp escape str) data))))))
 
 (defn bar [x]
   (apply str (repeat x "#")))

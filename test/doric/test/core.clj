@@ -21,14 +21,12 @@
 
 (deftest test-width
   (is (= 5 (width {:width 5} ["no matter what"])))
-  (is (= 9 (width {:title "TitleCase"} ["hi"])))
-  (is (= 8 (width {:title "Title"} ["whatever" "is" "largest"])))
-  (is (= 7 (width {:name :foobar} ["foobar2"]))))
+  (is (= 9 (width {:title "TitleCase" :escape identity} ["hi"])))
+  (is (= 8 (width {:title "Title" :escape identity} ["whatever" "is" "largest"])))
+  (is (= 7 (width {:name :foobar :escape identity} ["foobar2"]))))
 
 
 ;; TODO (deftest test-header)
-
-;; TODO (deftest test-body)
 
 (deftest test-assemble
   (let [rendered (assemble [["1" "2"]["3" "4"]])]
@@ -42,6 +40,15 @@
     (is (.contains rendered "| 1 | 2 |"))
     (is (.contains rendered "| 3 | 4 |"))
     (is (.contains rendered "|---+---|"))))
+
+(deftest test-escaping
+  (let [rendered (table* [:a :b] [{:a "foo\nbar" :b "what\tever"}])]
+    (is (= rendered
+           ["|----------+------------|"
+            "|     A    |      B     |"
+            "|----------+------------|"
+            "| foo\\nbar | what\\tever |" ;; lines up when printed
+            "|----------+------------|"]))))
 
 (deftest test-table*-laziness
   (let [calls (atom 0)

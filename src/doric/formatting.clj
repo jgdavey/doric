@@ -17,6 +17,12 @@
                                 n))
                 "-" " ")))
 
+(defn escape [s]
+  (if (string? s)
+    (str/escape s {\newline "\\n"
+                   \tab     "\\t"})
+    s))
+
 (defn align-cell [col s align]
   (let [width (:width col)
         s (str s)

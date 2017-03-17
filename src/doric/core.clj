@@ -1,7 +1,12 @@
 (ns doric.core
   (:refer-clojure :exclude [format name join split])
   (:require [doric.formatting :refer [titleize]]
-            [clojure.string :as str]))
+            [doric.protocols :refer [render render-lazy]]
+            [clojure.string :as str]
+            [doric.org]
+            [doric.raw]
+            [doric.html]
+            [doric.csv]))
 
 (defn column-defaults [col]
   (merge col
@@ -30,23 +35,14 @@
 (defn bar [x]
   (apply str (repeat x "#")))
 
-(defn header [th cols]
-  (for [col cols
-        :when (:when col)]
-    (th col)))
-
-(defn body [td cols rows]
-  (for [row rows]
-    (for [col cols
-          :when (:when col)]
-      (td col row))))
-
 (defn format-rows [cols rows]
   (for [row rows]
     (reduce
-     (fn [m {:keys [name] :as col}]
+     (fn [m {:keys [name format] :as col}]
        (assoc m name
-              ((:format col) (get row name))))
+              (-> row
+                  (get name)
+                  format)))
      {}
      cols)))
 
@@ -59,10 +55,10 @@
            {:width (width col (col-data col rows))})))
 
 ;; table formats
-(def csv 'doric.csv)
-(def html 'doric.html)
-(def org 'doric.org)
-(def raw 'doric.raw)
+(def renderers {:csv doric.csv/renderer
+                :html doric.html/renderer
+                :org doric.org/renderer
+                :raw doric.raw/renderer})
 
 (defn mapify [rows]
   (let [example (first rows)]
@@ -74,8 +70,8 @@
           (map? example) rows)))
 
 (defn conform
-  "Given an optional colspec and a sequence of maps, returns tuple
-  of [conformed-columns formatted-rows]"
+  "Given an optional colspec and a sequence of maps, returns map with
+  keys :cols, :rows"
   ([rows]
    (conform nil rows))
   ([cols rows]
@@ -84,14 +80,10 @@
                                  (keys (first rows))))
          rows (format-rows cols rows)
          cols (columns-with-widths cols rows)]
-     [cols rows])))
+     {:cols cols, :rows rows})))
 
-(defn table*
-  {:arglists '[[rows]
-               [opts rows]
-               [cols rows]
-               [opts cols rows]]}
-  [& args]
+(defn -parse-args
+  [args]
   (let [rows (last args)
         [opts cols] (case (count args)
                       1 [nil nil]
@@ -99,13 +91,19 @@
                           [(first args) nil]
                           [nil (first args)])
                       3 [(first args) (second args)])
-        format (or (:format opts) org)
-        _ (require format)
-        th (ns-resolve format 'th)
-        td (ns-resolve format 'td)
-        render (ns-resolve format 'render)
-        [cols rows] (conform cols rows)]
-    (render (cons (header th cols) (body td cols rows)))))
+        format (or (:format opts) :org)
+        renderer (renderers format format)
+        cols-rows (conform cols rows)]
+    (merge {:renderer renderer} cols-rows)))
+
+(defn table*
+  {:arglists '[[rows]
+               [opts rows]
+               [cols rows]
+               [opts cols rows]]}
+  [& args]
+  (let [{:keys [renderer cols rows]} (-parse-args args)]
+    (render-lazy renderer cols rows)))
 
 (defn table
   {:arglists '[[rows]
@@ -113,4 +111,5 @@
                [cols rows]
                [otps cols rows]]}
   [& args]
-  (apply str (str/join "\n" (apply table* args))))
+  (let [{:keys [renderer cols rows]} (-parse-args args)]
+    (render renderer cols rows)))

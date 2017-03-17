@@ -1,16 +1,17 @@
 (ns doric.html
-  (:use [clojure.string :as str]
-        [doric.formatting :refer [unaligned-th unaligned-td]]))
+  (:require [clojure.string :as str]
+            [doric.protocols :refer [tabular-renderer]]
+            [doric.formatting :refer [unaligned-th unaligned-td]]))
 
-(def th unaligned-th)
-
-(def td unaligned-td)
-
-(defn render [table]
+(defn assemble [rows]
   (concat ["<table>"
-           (str "<tr>" (str/join (for [c (first table)]
+           (str "<tr>" (str/join (for [c (first rows)]
                                (str "<th>" c "</th>"))) "</tr>")]
-          (for [tr (rest table)]
+          (for [tr (rest rows)]
             (str "<tr>" (str/join (for [c tr]
                                 (str "<td>" c "</td>"))) "</tr>"))
           ["</table>"]))
+
+(def renderer (tabular-renderer {:th unaligned-th
+                                 :td unaligned-td
+                                 :assemble assemble}))

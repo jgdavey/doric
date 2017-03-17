@@ -19,3 +19,12 @@
   (is (= "  . " (align-cell {:width 4} "." :center)))
   (is (= "   ." (align-cell {:width 4} "." :right))))
 
+(deftest test-aligned-th
+  (is (= "Title  " (aligned-th {:width 7 :title-align :left} "Title")))
+  (is (= " Title " (aligned-th {:width 7 :title-align :center} "Title")))
+  (is (= "  Title" (aligned-th {:width 7 :title-align :right} "Title"))))
+
+(deftest test-aligned-td
+  (is (= ".  " (aligned-td {:width 3 :align :left} ".")))
+  (is (= " . " (aligned-td {:width 3 :align :center} ".")))
+  (is (= "  ." (aligned-td {:width 3 :align :right} "."))))

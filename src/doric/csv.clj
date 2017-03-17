@@ -1,10 +1,8 @@
 (ns doric.csv
   (:require [clojure.string :as str]
+            [doric.protocols :refer [tabular-renderer]]
             [doric.formatting :refer [unaligned-th unaligned-td]]))
 
-(def th unaligned-th)
-
-(def td unaligned-td)
 
 (defn escape [s]
   (let [s (.replaceAll (str s) "\"" "\"\"")]
@@ -12,7 +10,11 @@
       (str "\"" s "\"")
       s)))
 
-(defn render [table]
-  (cons (str/join "," (map escape (first table)))
-        (for [tr (rest table)]
-          (str/join "," (map escape tr)))))
+(defn assemble [rows]
+  (cons (str/join "," (first rows))
+        (for [tr (rest rows)]
+          (str/join "," tr))))
+
+(def renderer (tabular-renderer {:th (comp escape unaligned-th)
+                                 :td (comp escape unaligned-td)
+                                 :assemble assemble}))

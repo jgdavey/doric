@@ -2,7 +2,7 @@
   (:refer-clojure :exclude [format name when])
   (:use [doric.core]
         [clojure.test]
-        [doric.org :only [th td render]]))
+        [doric.org :only [assemble]]))
 
 (deftest test-column-defaults
   (is (= "foo" (:title (columnize {:title "foo"}))))
@@ -24,22 +24,13 @@
   (is (= 8 (width {:title "Title"} ["whatever" "is" "largest"])))
   (is (= 7 (width {:name :foobar} ["foobar2"]))))
 
-(deftest test-th
-  (is (= "Title  " (th {:title "Title" :width 7 :title-align :left})))
-  (is (= " Title " (th {:title "Title" :width 7 :title-align :center})))
-  (is (= "  Title" (th {:title "Title" :width 7 :title-align :right}))))
-
-(deftest test-td
-  (is (= ".  " (td {:name :t :width 3 :align :left} {:t "."})))
-  (is (= " . " (td {:name :t :width 3 :align :center} {:t "."})))
-  (is (= "  ." (td {:name :t :width 3 :align :right} {:t "."}))))
 
 ;; TODO (deftest test-header)
 
 ;; TODO (deftest test-body)
 
-(deftest test-render
-  (let [rendered (render [["1" "2"]["3" "4"]])]
+(deftest test-assemble
+  (let [rendered (assemble [["1" "2"]["3" "4"]])]
     (is (.contains rendered "| 1 | 2 |"))
     (is (.contains rendered "| 3 | 4 |"))
     (is (.contains rendered "|---+---|"))))
@@ -67,7 +58,7 @@
         (is (= 0 @calls))))
     (reset! calls 0)
     (testing "even for formats that should be automatically lazy, like csv"
-      (let [seq (table* ^{:format csv}
+      (let [seq (table* {:format :csv}
                         [{:name :1 :format inc :width 0}
                          {:name :2 :format inc :width 0}]
                         [{:1 3 :2 4}])]

@@ -38,21 +38,17 @@
 
 ;; unalighed-th and td are useful for whitespace immune formats, like
 ;; csv and html
-(defn unaligned-th [col]
-  (:title col))
-
-(defn unaligned-td [col row]
-  (row (:name col)))
+(defn unaligned-th [_ data] data)
+(defn unaligned-td [_ data] data)
 
 ;; aligned th and td are useful for whitespace sensitive formats, like
 ;; raw and org
-
-(defn aligned-th [col]
+(defn aligned-th [col cell-data]
   (align-cell col
-              (unaligned-th col)
+              cell-data
               (:title-align col)))
 
-(defn aligned-td [col row]
+(defn aligned-td [col cell-data]
   (align-cell col
-              (unaligned-td col row)
+              cell-data
               (:align col)))

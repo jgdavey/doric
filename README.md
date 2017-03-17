@@ -15,15 +15,7 @@ Add this to your project.clj :dependencies list:
 In most cases, you'll just want to use/require the table function.
 
 ```clojure
-> (use '[doric.core :only [table]])
-nil
-```
-
-But you can access other things if you'd like, for instance if you
-want to use the other formats.
-
-```clojure
-> (use '[doric.core :only [table csv html org raw]])
+> (require '[doric.core :refer [table]])
 nil
 ```
 
@@ -59,19 +51,19 @@ nil
 But you can also have raw, csv, and html tables pretty easily:
 
 ```clojure
-> (println (table {:format raw} [:a :b :c] [{:a 1 :b 2 :c 3}{:a 4 :b 5 :c 6}]))
+> (println (table {:format :raw} [:a :b :c] [{:a 1 :b 2 :c 3}{:a 4 :b 5 :c 6}]))
 A B C
 1 2 3
 4 5 6
 nil
 
-> (println (table {:format csv} [:a :b :c] [{:a 1 :b 2 :c 3}{:a 4 :b 5 :c 6}]))
+> (println (table {:format :csv} [:a :b :c] [{:a 1 :b 2 :c 3}{:a 4 :b 5 :c 6}]))
 A,B,C
 1,2,3
 4,5,6
 nil
 
-> (println (table {:format html} [{:a 1 :b 2 :c 3}{:a 4 :b 5 :c 6}]))
+> (println (table {:format :html} [{:a 1 :b 2 :c 3}{:a 4 :b 5 :c 6}]))
 ;; omg lots of <tr>s and <td>s here
 ```
 
@@ -79,7 +71,7 @@ You can also use a custom table format by specifying a namespace that
 contains the functions th, td, and render.
 
 ```clojure
-> (println (table {:format 'my.sweet.ns} [{:a 1 :b 2 :c 3}{:a 4 :b 5 :c 6}]))
+> (println (table {:format thing-that-implements-Render} [{:a 1 :b 2 :c 3}{:a 4 :b 5 :c 6}]))
 ;; the sky's the limit, buddy
 ```
 
@@ -145,9 +137,9 @@ are displayed. For example, there's an included bar function for
 creating text bar charts:
 
 ```clojure
-> (use '[doric.core :only [bar]])
+> (require '[doric.core :refer [table bar]])
 nil
-> (println (table {:format raw} [:a :b {:name :c :format bar}]
+> (println (table {:format :raw} [:a :b {:name :c :format bar}]
                                 [{:a 1 :b 2 :c 3}{:a 4 :b 5 :c 6}]))
 A B    C  
 1 2 ###   

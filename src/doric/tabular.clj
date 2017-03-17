@@ -3,19 +3,20 @@
             [doric.protocols :refer :all]
             [doric.formatting :refer [escape align-cell]]))
 
-(defn- col-data [col rows]
-  (map #(get % (:name col)) rows))
+(defn- col-data [{:keys [name]} rows]
+  (map (comp escape str name) rows))
 
-(defn width [{:keys [title escape width]} data]
+(defn width [{:keys [title escape width]} cells]
   (or width
-      (apply max (map count (cons title
-                                  (map (comp escape str) data))))))
+      (->> cells
+           (cons (escape title))
+           (map count)
+           (apply max))))
 
 (defn columns-with-widths [cols rows]
   (for [col cols]
     (merge col
            {:width (width col (col-data col rows))})))
-
 
 (defrecord TabularRender [th td assemble]
   Render

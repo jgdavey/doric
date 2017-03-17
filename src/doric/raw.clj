@@ -1,7 +1,8 @@
 (ns doric.raw
   (:require [clojure.string :as str]
-            [doric.protocols :refer [tabular-renderer]]
-            [doric.formatting :refer [aligned-th aligned-td]]))
+            [doric.tabular :refer [tabular-renderer
+                                   aligned-th
+                                   aligned-td]]))
 
 (defn assemble [rows]
   (cons (str/join " " (first rows))

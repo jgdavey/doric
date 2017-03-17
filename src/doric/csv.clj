@@ -1,7 +1,8 @@
 (ns doric.csv
   (:require [clojure.string :as str]
-            [doric.protocols :refer [tabular-renderer]]
-            [doric.formatting :refer [unaligned-th unaligned-td]]))
+            [doric.tabular :refer [tabular-renderer
+                                   unaligned-td
+                                   unaligned-th]]))
 
 
 (defn escape [s]

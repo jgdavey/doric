@@ -29,11 +29,6 @@
 
 (def columnize (comp column-defaults column-map))
 
-(defn width [{:keys [title escape width]} data]
-  (or width
-      (apply max (map count (cons title
-                                  (map (comp escape str) data))))))
-
 (defn bar [x]
   (apply str (repeat x "#")))
 
@@ -47,14 +42,6 @@
                   format)))
      {}
      cols)))
-
-(defn- col-data [col rows]
-  (map #(get % (:name col)) rows))
-
-(defn columns-with-widths [cols rows]
-  (for [col cols]
-    (merge col
-           {:width (width col (col-data col rows))})))
 
 ;; table formats
 (def renderers {:csv doric.csv/renderer
@@ -83,8 +70,7 @@
          cols (filter :when
                       (map columnize (or cols
                                          (keys (first rows)))))
-         rows (format-rows cols rows)
-         cols (columns-with-widths cols rows)]
+         rows (format-rows cols rows)]
      {:cols cols, :rows rows})))
 
 (defn -parse-args

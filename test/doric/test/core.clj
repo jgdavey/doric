@@ -2,7 +2,8 @@
   (:require [clojure.test :refer :all]
             [cheshire.core :as json]
             [doric.core :refer :all]
-            [doric.org :refer [assemble]]))
+            [doric.org :refer [assemble]]
+            [doric.tabular :refer [width]]))
 
 (deftest test-column-defaults
   (is (= "foo" (:title (columnize {:title "foo"}))))
@@ -17,13 +18,6 @@
   (is (re-find #"bar" (table [{:name :foo :when true}] [{:foo :bar}])))
   (is (not (re-find #"Foo" (table [{:name :foo :when false}] [{:foo :bar}]))))
   (is (not (re-find #"bar" (table [{:name :foo :when false}] [{:foo :bar}])))))
-
-(deftest test-width
-  (is (= 5 (width {:width 5} ["no matter what"])))
-  (is (= 9 (width {:title "TitleCase" :escape identity} ["hi"])))
-  (is (= 8 (width {:title "Title" :escape identity} ["whatever" "is" "largest"])))
-  (is (= 7 (width {:name :foobar :escape identity} ["foobar2"]))))
-
 
 ;; TODO (deftest test-header)
 

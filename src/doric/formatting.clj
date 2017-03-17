@@ -39,22 +39,3 @@
       :center (str (pad (Math/ceil half-padding))
                    s
                    (pad (Math/floor half-padding))))))
-
-;; table format helpers
-
-;; unalighed-th and td are useful for whitespace immune formats, like
-;; csv and html
-(defn unaligned-th [_ data] data)
-(defn unaligned-td [_ data] data)
-
-;; aligned th and td are useful for whitespace sensitive formats, like
-;; raw and org
-(defn aligned-th [col cell-data]
-  (align-cell col
-              cell-data
-              (:title-align col)))
-
-(defn aligned-td [col cell-data]
-  (align-cell col
-              cell-data
-              (:align col)))

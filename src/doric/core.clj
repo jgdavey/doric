@@ -6,7 +6,8 @@
             [doric.org]
             [doric.raw]
             [doric.html]
-            [doric.csv]))
+            [doric.csv]
+            [doric.json]))
 
 (defn column-defaults [col]
   (merge col
@@ -58,7 +59,9 @@
 (def renderers {:csv doric.csv/renderer
                 :html doric.html/renderer
                 :org doric.org/renderer
-                :raw doric.raw/renderer})
+                :raw doric.raw/renderer
+                :json (doric.json/make-renderer)
+                :json-pretty (doric.json/make-renderer true)})
 
 (defn mapify [rows]
   (let [example (first rows)]

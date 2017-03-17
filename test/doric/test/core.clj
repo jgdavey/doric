@@ -1,8 +1,9 @@
 (ns doric.test.core
   (:refer-clojure :exclude [format name when])
-  (:use [doric.core]
-        [clojure.test]
-        [doric.org :only [assemble]]))
+  (:require [clojure.test :refer :all]
+            [cheshire.core :as json]
+            [doric.core :refer :all]
+            [doric.org :refer [assemble]]))
 
 (deftest test-column-defaults
   (is (= "foo" (:title (columnize {:title "foo"}))))
@@ -63,6 +64,16 @@
                          {:name :2 :format inc :width 0}]
                         [{:1 3 :2 4}])]
         (is (= 0 @calls))))))
+
+(deftest test-json
+  (let [data [{:a 1 :b "2"} {:a 2 :b "42"}]
+        out (table {:format :json} data)]
+    (is (= data (json/parse-string out true)))))
+
+(deftest test-json-table*
+  (let [data [{:a 1 :b "2"} {:a 2 :b "42"}]
+        out (table* {:format :json} data)]
+    (is (= data (map #(json/parse-string % true) out)))))
 
 (deftest test-empty-table
   (let [empty-table "|--|\n|  |\n|--|\n|--|"]

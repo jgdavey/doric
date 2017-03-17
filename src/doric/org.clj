@@ -1,7 +1,6 @@
 (ns doric.org
-  (:refer-clojure :exclude [join])
-  (:use [clojure.string :only [join]]
-        [doric.core :only [aligned-th aligned-td]]))
+  (:require [clojure.string :as str]
+            [doric.formatting :refer [aligned-th aligned-td]]))
 
 (def th aligned-th)
 
@@ -9,13 +8,13 @@
 
 (defn render [table]
   (let [spacer (str "|-"
-                    (join "-+-"
+                    (str/join "-+-"
                           (map #(apply str (repeat (.length %) "-"))
                                (first table)))
                     "-|")]
     (concat [spacer
-             (str "| " (join " | " (first table)) " |")
+             (str "| " (str/join " | " (first table)) " |")
              spacer]
             (for [tr (rest table)]
-              (str "| " (join " | " tr) " |"))
+              (str "| " (str/join " | " tr) " |"))
             [spacer])))

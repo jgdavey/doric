@@ -1,7 +1,6 @@
 (ns doric.csv
-  (:refer-clojure :exclude [join])
-  (:use [clojure.string :only [join]]
-        [doric.core :only [unaligned-th unaligned-td]]))
+  (:require [clojure.string :as str]
+            [doric.formatting :refer [unaligned-th unaligned-td]]))
 
 (def th unaligned-th)
 
@@ -14,6 +13,6 @@
       s)))
 
 (defn render [table]
-  (cons (join "," (map escape (first table)))
+  (cons (str/join "," (map escape (first table)))
         (for [tr (rest table)]
-          (join "," (map escape tr)))))
+          (str/join "," (map escape tr)))))

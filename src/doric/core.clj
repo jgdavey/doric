@@ -1,94 +1,52 @@
 (ns doric.core
-  (:refer-clojure :exclude [format name join split when])
-  (:use [clojure.string :only [join split]]))
+  (:refer-clojure :exclude [format name join split])
+  (:require [doric.formatting :refer [titleize]]
+            [clojure.string :as str]))
 
-(defn- title-case-word [w]
-  (if (zero? (count w))
-    w
-    (str (Character/toTitleCase (first w))
-         (subs w 1))))
+(defn column-defaults [col]
+  (merge col
+         {:align (keyword (get col :align :left))
+          :format (or (:format col)
+                      identity)
+          :title  (or (:title col)
+                      (titleize (:name col)))
+          :title-align (keyword (or (:title-align col)
+                                    (:align col)
+                                    :center))
+          :when (:when col true)}))
 
-(defn title-case [s]
-  (join " " (map title-case-word (split s #"\s"))))
+(defn column-map [col]
+  (if (map? col)
+    col
+    {:name col}))
 
-(defn align [col & [data]]
-  (or (keyword (:align col))
-      :left))
-
-(defn format [col & [data]]
-  (or (:format col)
-      identity))
-
-(defn title [col & [data]]
-  (or (:title col)
-      (title-case
-       (.replaceAll (clojure.core/name (let [n (:name col)]
-                                         (if (number? n)
-                                           (str n)
-                                           n)))
-                    "-" " "))))
-
-(defn title-align [col & [data]]
-  (keyword (or (:title-align col)
-               (:align col)
-               :center)))
-
-(defn when [col & [data]]
-  (:when col true))
+(def columnize (comp column-defaults column-map))
 
 (defn width [col & [data]]
   (or (:width col)
       (apply max (map count (cons (:title col)
                                   (map str data))))))
 
+(defn bar [x]
+  (apply str (repeat x "#")))
+
 (defn format-cell [col s]
   ((:format col) s))
 
-(defn align-cell [col s align]
-  (let [width (:width col)
-        s (str s)
-        s (cond (<= (count s) width) s
-                (:ellipsis col) (str (subs s 0 (- width 3)) "...")
-                :else (subs s 0 width))
-        len (count s)
-        pad #(apply str (take % (repeat " ")))
-        padding (- width len)
-        half-padding (/ (- width len) 2)]
-    (case align
-      :left (str s (pad padding))
-      :right (str (pad padding) s)
-      :center (str (pad (Math/ceil half-padding))
-                   s
-                   (pad (Math/floor half-padding))))))
-
 (defn header [th cols]
-  (for [col cols :when (:when col)]
+  (for [col cols
+        :when (:when col)]
     (th col)))
 
 (defn body [td cols rows]
   (for [row rows]
-    (for [col cols :when (:when col)]
+    (for [col cols
+          :when (:when col)]
       (td col row))))
 
 (defn- col-data [col rows]
   (map #(get % (:name col)) rows))
 
-(defn- column1 [col & [data]]
-  {:align (align col data)
-   :format (format col data)
-   :title (title col data)
-   :title-align (title-align col data)
-   :when (when col data)})
-
-(defn- column-map [col]
-  (if (map? col)
-    col
-    {:name col}))
-
-(defn- columns1 [cols rows]
-  (for [col cols :let [col (column-map col)]]
-    (merge col
-           (column1 col (col-data col rows)))))
 
 (defn- format-rows [cols rows]
   (for [row rows]
@@ -104,32 +62,11 @@
     (merge col
            (column2 col (col-data col rows)))))
 
-;; data formats
-(defn bar [x]
-  (apply str (repeat x "#")))
-
 ;; table formats
 (def csv 'doric.csv)
 (def html 'doric.html)
 (def org 'doric.org)
 (def raw 'doric.raw)
-
-;; table format helpers
-;; aligned th and td are useful for whitespace sensitive formats, like
-;; raw and org
-(defn aligned-th [col]
-  (align-cell col (:title col) (:title-align col)))
-
-(defn aligned-td [col row]
-  (align-cell col (row (:name col)) (:align col)))
-
-;; unalighed-th and td are useful for whitespace immune formats, like
-;; csv and html
-(defn unaligned-th [col]
-  (:title col))
-
-(defn unaligned-td [col row]
-  (row (:name col)))
 
 (defn mapify [rows]
   (let [example (first rows)]
@@ -159,7 +96,7 @@
         th (ns-resolve format 'th)
         td (ns-resolve format 'td)
         render (ns-resolve format 'render)
-        cols (columns1 cols rows)
+        cols (map columnize cols)
         rows (format-rows cols rows)
         cols (columns2 cols rows)]
     (render (cons (header th cols) (body td cols rows)))))
@@ -170,4 +107,4 @@
                [cols rows]
                [otps cols rows]]}
   [& args]
-  (apply str (join "\n" (apply table* args))))
+  (apply str (str/join "\n" (apply table* args))))

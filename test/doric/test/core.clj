@@ -1,5 +1,4 @@
 (ns doric.test.core
-  (:refer-clojure :exclude [format name when])
   (:require [clojure.test :refer :all]
             [cheshire.core :as json]
             [doric.core :refer :all]
@@ -76,6 +75,14 @@
   (let [data [{:a 1 :b "2"} {:a 2 :b "42"}]
         out (table {:format :json} data)]
     (is (= data (json/parse-string out true)))))
+
+(deftest test-json-format-and-when
+  (let [data [{:a "1" :b 2} {:a "2" :b 42}]
+        out (table {:format :json}
+                   [{:name :a :when false} {:name :b :format inc}]
+                   data)]
+    (is (= [{:b 3} {:b 43}]
+           (json/parse-string out true)))))
 
 (deftest test-json-table*
   (let [data [{:a 1 :b "2"} {:a 2 :b "42"}]

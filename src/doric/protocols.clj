@@ -13,12 +13,10 @@
               (-render-lazy this cols data)))
   (-render-lazy [_ cols data]
     (assemble
-     (cons (for [col cols
-                 :when (:when col)]
+     (cons (for [col cols]
              (th col (escape (:title col))))
            (for [row data]
-             (for [col cols
-                   :when (:when col)]
+             (for [col cols]
                (td col (escape (get row (:name col))))))))))
 
 (defn render-lazy [renderer cols data]

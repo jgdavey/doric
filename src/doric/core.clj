@@ -80,8 +80,9 @@
    (conform nil rows))
   ([cols rows]
    (let [rows (mapify rows)
-         cols (map columnize (or cols
-                                 (keys (first rows))))
+         cols (filter :when
+                      (map columnize (or cols
+                                         (keys (first rows)))))
          rows (format-rows cols rows)
          cols (columns-with-widths cols rows)]
      {:cols cols, :rows rows})))

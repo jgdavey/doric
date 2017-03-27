@@ -3,6 +3,11 @@
             [doric.tabular :refer [tabular-renderer
                                    unaligned-td
                                    unaligned-th]]))
+(defn escape [^String s]
+  (-> s
+      (str/replace "&" "&amp;")
+      (str/replace "<" "&lt;")
+      (str/replace ">" "&gt;")))
 
 (defn assemble [rows]
   (concat ["<table>"
@@ -15,4 +20,5 @@
 
 (def renderer (tabular-renderer {:th unaligned-th
                                  :td unaligned-td
-                                 :assemble assemble}))
+                                 :assemble assemble
+                                 :escape escape}))

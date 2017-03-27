@@ -18,4 +18,5 @@
 
 (def renderer (tabular-renderer {:th (comp escape unaligned-th)
                                  :td (comp escape unaligned-td)
-                                 :assemble assemble}))
+                                 :assemble assemble
+                                 :escape escape}))

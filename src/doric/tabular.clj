@@ -1,39 +1,38 @@
 (ns doric.tabular
   (:require [clojure.string :as str]
             [doric.protocols :refer :all]
-            [doric.formatting :refer [escape align-cell]]))
+            [doric.formatting :refer [align-cell]]))
 
-(defn- col-data [{:keys [name]} rows]
-  (map (comp escape str name) rows))
 
-(defn width [{:keys [title escape width]} cells]
-  (or width
-      (->> cells
-           (cons (escape title))
-           (map count)
-           (apply max))))
+(defn calculate-width
+  ([col rows]
+   (calculate-width col rows identity))
+  ([{:keys [title name]} rows escape]
+   (->> rows
+        (map (comp escape str name))
+        (cons (escape title))
+        (map count)
+        (apply max))))
 
-(defn columns-with-widths [cols rows]
-  (for [col cols]
-    (merge col
-           {:width (width col (col-data col rows))})))
+(defn columns-with-widths [escape cols rows]
+  (for [{:keys [width] :as col} cols]
+    (assoc col
+           :width (or width
+                      (calculate-width col rows escape)))))
 
-(defrecord TabularRender [th td assemble]
+(defrecord TabularRender [th td assemble escape]
   Render
   (-render [this cols data]
     (str/join "\n"
               (-render-lazy this cols data)))
   (-render-lazy [_ cols data]
-    (let [cols (columns-with-widths cols data)]
+    (let [cols (columns-with-widths escape cols data)]
       (assemble
        (cons (for [col cols]
                (th col (escape (:title col))))
              (for [row data]
                (for [col cols]
                  (td col (escape (get row (:name col)))))))))))
-
-(defn tabular-renderer [{:keys [td th assemble] :as fns}]
-  (map->TabularRender fns))
 
 ;; table format helpers
 
@@ -52,4 +51,10 @@
 (defn aligned-td [col cell-data]
   (align-cell col
               cell-data
-              (:align col)))
+             (:align col)))
+
+(defn tabular-renderer [{:keys [td th assemble escape]}]
+  (map->TabularRender {:td (or td unaligned-td)
+                       :th (or th unaligned-th)
+                       :escape (or escape identity)
+                       :assemble assemble}))

@@ -2,8 +2,7 @@
   (:require [clojure.test :refer :all]
             [cheshire.core :as json]
             [doric.core :refer :all]
-            [doric.org :refer [assemble]]
-            [doric.tabular :refer [width]]))
+            [doric.org :refer [assemble]]))
 
 (deftest test-column-defaults
   (is (= "foo" (:title (columnize {:title "foo"}))))
@@ -42,6 +41,16 @@
             "|----------+------------|"
             "| foo\\nbar | what\\tever |" ;; lines up when printed
             "|----------+------------|"]))))
+
+(deftest test-escaping-html
+  (let [rendered (table* {:format :html}
+                         [:a :b]
+                         [{:a "foo < bar" :b "what & ever"}])]
+    (is (= rendered
+           ["<table>"
+            "<tr><th>A</th><th>B</th></tr>"
+            "<tr><td>foo &lt; bar</td><td>what &amp; ever</td></tr>"
+            "</table>"]))))
 
 (deftest test-table*-laziness
   (let [calls (atom 0)

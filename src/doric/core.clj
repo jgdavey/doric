@@ -1,5 +1,5 @@
 (ns doric.core
-  (:require [doric.formatting :refer [titleize escape]]
+  (:require [doric.formatting :refer [titleize]]
             [doric.protocols :refer [render render-lazy]]
             [clojure.string :as str]
             [doric.org]
@@ -13,8 +13,6 @@
          {:align (keyword (get col :align :left))
           :format (or (:format col)
                       identity)
-          :escape (or (:escape col)
-                      escape)
           :title  (or (:title col)
                       (titleize (:name col)))
           :title-align (keyword (or (:title-align col)

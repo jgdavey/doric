@@ -1,5 +1,6 @@
 (ns doric.org
   (:require [clojure.string :as str]
+            [doric.formatting :refer [escape]]
             [doric.tabular :refer [tabular-renderer
                                    aligned-th
                                    aligned-td]]))
@@ -19,4 +20,5 @@
 
 (def renderer (tabular-renderer {:th aligned-th
                                  :td aligned-td
-                                 :assemble assemble}))
+                                 :assemble assemble
+                                 :escape escape}))

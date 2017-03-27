@@ -12,8 +12,9 @@
   (is (= " . " (aligned-td {:width 3 :align :center} ".")))
   (is (= "  ." (aligned-td {:width 3 :align :right} "."))))
 
-(deftest test-width
-  (is (= 5 (width {:width 5} ["no matter what"])))
-  (is (= 9 (width {:title "TitleCase" :escape identity} ["hi"])))
-  (is (= 8 (width {:title "Title" :escape identity} ["whatever" "is" "largest"])))
-  (is (= 7 (width {:name :foobar :escape identity} ["foobar2"]))))
+(deftest test-calculate-width
+  (is (= 9 (calculate-width {:title "TitleCase" :name :a} ["hi"])))
+  (is (= 8 (calculate-width {:title "Title" :name :a} [{:a "whatever"}
+                                                                {:a "is"}
+                                                                {:a "largest"}])))
+  (is (= 7 (calculate-width {:name :foobar} [{:foobar "foobar2"}]))))

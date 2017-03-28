@@ -33,6 +33,19 @@
     (is (.contains rendered "| 3 | 4 |"))
     (is (.contains rendered "|---+---|"))))
 
+(deftest test-unicode-table
+  (let [rendered (table* {:format :unicode}
+                         [{:name :foo} {:name :bar :width 9}]
+                         [{:foo "what" :bar 4}
+                          {:foo "who"  :bar 87}])]
+    (is (= rendered
+           ["┌──────┬───────────┐"
+            "│  Foo │    Bar    │"
+            "├──────┼───────────┤"
+            "│ what │ 4         │"
+            "│ who  │ 87        │"
+            "└──────┴───────────┘"]))))
+
 (deftest test-escaping
   (let [rendered (table* [:a :b] [{:a "foo\nbar" :b "what\tever"}])]
     (is (= rendered

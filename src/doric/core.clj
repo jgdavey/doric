@@ -6,7 +6,8 @@
             [doric.raw]
             [doric.html]
             [doric.csv]
-            [doric.json]))
+            [doric.json]
+            [doric.unicode]))
 
 (defn column-defaults [col]
   (merge col
@@ -46,6 +47,7 @@
                 :html doric.html/renderer
                 :org doric.org/renderer
                 :raw doric.raw/renderer
+                :unicode doric.unicode/renderer
                 :json (doric.json/make-renderer)
                 :json-pretty (doric.json/make-renderer true)})
 

@@ -1,21 +1,24 @@
 (ns doric.formatting
   (:require [clojure.string :as str]))
 
+(defn string ^String [elem]
+  (str (cond
+         (keyword? elem) (name elem)
+         (symbol? elem) (name elem)
+         :else elem)))
+
 (defn- title-case-word [w]
   (if (zero? (count w))
     w
     (str (Character/toTitleCase (first w))
          (subs w 1))))
 
-(defn title-case [s]
+(defn title-case [^String s]
   (str/join " " (map title-case-word (str/split s #"\s"))))
 
 (defn titleize [n]
   (title-case
-   (.replaceAll ^String (name (if (number? n)
-                                (str n)
-                                n))
-                "-" " ")))
+   (.replaceAll (string n) "-" " ")))
 
 (defn escape [s]
   (if (string? s)

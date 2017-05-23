@@ -100,7 +100,7 @@
   {:arglists '[[rows]
                [opts rows]
                [cols rows]
-               [otps cols rows]]}
+               [opts cols rows]]}
   [& args]
   (let [{:keys [renderer cols rows]} (-parse-args args)]
     (render renderer cols rows)))

@@ -1,11 +1,12 @@
 (ns doric.core
   (:require [doric.formatting :refer [titleize]]
-            [doric.protocols :refer [render render-lazy]]
+            [doric.protocols :refer [render render-lazy Render]]
             [clojure.string :as str]
             [doric.org]
             [doric.raw]
             [doric.html]
             [doric.csv]
+            [doric.confluence]
             [doric.json]))
 
 (defn column-defaults [col]
@@ -46,6 +47,7 @@
                 :html doric.html/renderer
                 :org doric.org/renderer
                 :raw doric.raw/renderer
+                :confluence doric.confluence/renderer
                 :json (doric.json/make-renderer)
                 :json-pretty (doric.json/make-renderer true)})
 
@@ -80,8 +82,10 @@
                           [(first args) nil]
                           [nil (first args)])
                       3 [(first args) (second args)])
-        format (or (:format opts) :org)
-        renderer (renderers format format)
+        format (:format opts)
+        renderer (if (satisfies? Render format)
+                   format
+                   (renderers (or format :org)))
         cols-rows (conform cols rows)]
     (merge {:renderer renderer} cols-rows)))
 

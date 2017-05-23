@@ -33,6 +33,12 @@
     (is (.contains rendered "| 3 | 4 |"))
     (is (.contains rendered "|---+---|"))))
 
+(deftest test-table-confluence
+  (let [rendered (table* {:format :confluence} [{:1 3 :2 "a | b"}])]
+    (is (= rendered
+           ["||1||2||"
+            "|3|a &amp;#124; b|"]))))
+
 (deftest test-escaping
   (let [rendered (table* [:a :b] [{:a "foo\nbar" :b "what\tever"}])]
     (is (= rendered

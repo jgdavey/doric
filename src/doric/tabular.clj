@@ -3,13 +3,12 @@
             [doric.protocols :refer :all]
             [doric.formatting :refer [align-cell]]))
 
-
 (defn calculate-width
   ([col rows]
    (calculate-width col rows identity))
   ([{:keys [title name]} rows escape]
    (->> rows
-        (map (comp escape str name))
+        (map (comp escape str #(get % name)))
         (cons (escape title))
         (map count)
         (apply max))))

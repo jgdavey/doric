@@ -28,10 +28,24 @@
 
 ;; TODO embiggen these tests
 (deftest test-table
-  (let [rendered (table [{:1 3 :2 4}])]
-    (is (.contains rendered "| 1 | 2 |"))
-    (is (.contains rendered "| 3 | 4 |"))
-    (is (.contains rendered "|---+---|"))))
+  (let [rendered (table* [{:1 3 :2 4}])]
+    (is (= rendered
+           ["|---+---|"
+            "| 1 | 2 |"
+            "|---+---|"
+            "| 3 | 4 |"
+            "|---+---|"]))))
+
+(deftest test-render-vectors
+  (let [rendered (table* [[1 2] ["3" "4"] [:a :b]])]
+    (is (= rendered
+           ["|----+----|"
+            "|  0 |  1 |"
+            "|----+----|"
+            "| 1  | 2  |"
+            "| 3  | 4  |"
+            "| :a | :b |"
+            "|----+----|"]))))
 
 (deftest test-unicode-table
   (let [rendered (table* {:format :unicode}
